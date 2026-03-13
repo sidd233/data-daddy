@@ -1,9 +1,9 @@
 import { Geist, JetBrains_Mono } from "next/font/google"
-
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Providers } from "./providers"
 
 const fontSans = Geist({
   subsets: ["latin"],
@@ -33,7 +33,9 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <Providers>{children}</Providers>
+          </TooltipProvider>
         </ThemeProvider>
       </body>
     </html>
