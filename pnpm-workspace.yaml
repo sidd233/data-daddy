@@ -1,4 +1,5 @@
 allowBuilds:
+  blake-hash: true
   bufferutil: true
   msw: true
   sharp: true

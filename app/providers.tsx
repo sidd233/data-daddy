@@ -1,23 +1,27 @@
-"use client";
+"use client"
 
-import { ReactNode } from "react";
-import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { getDefaultConfig } from "@rainbow-me/rainbowkit";
-import { baseSepolia } from "wagmi/chains";
+import { ReactNode } from "react"
+import { WagmiProvider } from "wagmi"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import {
+  RainbowKitProvider,
+  darkTheme,
+  getDefaultConfig,
+} from "@rainbow-me/rainbowkit"
+import { baseSepolia } from "wagmi/chains"
+import { AnonAadhaarProvider } from "@anon-aadhaar/react"
 
-import "@rainbow-me/rainbowkit/styles.css";
+import "@rainbow-me/rainbowkit/styles.css"
 
 const config = getDefaultConfig({
-  appName: "Meridian",
-  // TODO: Replace with your actual WalletConnect project ID from https://cloud.walletconnect.com
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "YOUR_PROJECT_ID",
+  appName: "DataDaddy",
+  projectId:
+    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "YOUR_PROJECT_ID",
   chains: [baseSepolia],
   ssr: true,
-});
+})
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
@@ -31,9 +35,18 @@ export function Providers({ children }: { children: ReactNode }) {
             fontStack: "system",
           })}
         >
-          {children}
+          <AnonAadhaarProvider
+            _useTestAadhaar={true}
+            _artifactslinks={{
+              zkey_url: "/circuit_final.zkey",
+              vkey_url: "/vkey.json",
+              wasm_url: "/aadhaar-verifier.wasm",
+            }}
+          >
+            {children}
+          </AnonAadhaarProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
-  );
+  )
 }

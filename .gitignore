@@ -34,3 +34,9 @@ pnpm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+public/circuit_final.zkey
+
+# never listen to sthita
+# she dumb as hell
+sthita
