@@ -58,7 +58,7 @@ Set up env vars in both `packages/frontend/.env.local` and `packages/backend/.en
 | `/buyer` | Post lease requests on-chain, view approved users, access verified wallets |
 | `/stats` | Personal stats — verified attributes, earnings breakdown, lease summary |
 
-## Deployed Contracts (Base Sepolia)
+## Deployed Contracts(Base Sepolia)
 
 | Contract | Address |
 |-|-|
