@@ -30,7 +30,7 @@ export function SiteHeader() {
     <header className="flex items-center justify-between py-4 border-b mb-6">
       <div className="flex items-center gap-6">
         <div>
-          <span className="text-lg font-bold tracking-tight">Meridian</span>
+          <span className="text-lg font-bold tracking-tight">DataDaddy</span>
           {address && (
             <span className="ml-2 text-xs text-muted-foreground">{shortAddr(address)}</span>
           )}
@@ -40,6 +40,7 @@ export function SiteHeader() {
           {navLink("/leases", "My Leases")}
           {navLink("/verify", "Verify Identity")}
           {navLink("/buyer", "Buyer")}
+          {navLink("/stats", "Stats")}
         </nav>
       </div>
       <ConnectButton accountStatus="avatar" showBalance={false} />

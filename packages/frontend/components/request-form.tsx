@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { ATTRIBUTE_LABELS } from "@/lib/attributeKeys"
+import { ATTRIBUTE_LABELS, ATTRIBUTE_TIERS } from "@/lib/attributeKeys"
 import { Loader2 } from "lucide-react"
 
 const ATTRIBUTE_OPTIONS = Object.entries(ATTRIBUTE_LABELS) as [string, string][]
@@ -68,7 +68,14 @@ export function RequestForm({ onSubmit }: Props) {
           <Label>Attribute</Label>
           <Select
             value={values.attributeKey}
-            onValueChange={(v) => setValues((p) => ({ ...p, attributeKey: v }))}
+            onValueChange={(v) => {
+              const tier = ATTRIBUTE_TIERS[v as keyof typeof ATTRIBUTE_TIERS]
+              setValues((p) => ({
+                ...p,
+                attributeKey: v,
+                minConfidence: tier === 1 || tier === 2 ? 100 : p.minConfidence,
+              }))
+            }}
           >
             <SelectTrigger>
               <SelectValue />

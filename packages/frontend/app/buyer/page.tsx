@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { ATTRIBUTE_LABELS } from "@/lib/attributeKeys"
 import { LEASE_MANAGER } from "@/lib/contracts"
 import { PlusCircle, Users, Loader2, Database, ShieldCheck } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000"
 
@@ -64,6 +65,7 @@ export default function BuyerPage() {
   const [leases, setLeases] = useState<BuyerLease[]>([])
   const [access, setAccess] = useState<AccessGroup[]>([])
   const [posting, setPosting] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   const { writeContract, data: postHash } = useWriteContract()
   const { isSuccess: postSuccess, isLoading: postConfirming, data: postReceipt } =
@@ -89,9 +91,8 @@ export default function BuyerPage() {
 
   useEffect(() => {
     if (!isConnected || !address) return
-    fetchRequests()
-    fetchLeases()
-    fetchAccess()
+    setLoading(true)
+    Promise.all([fetchRequests(), fetchLeases(), fetchAccess()]).finally(() => setLoading(false))
   }, [isConnected, address, fetchRequests, fetchLeases, fetchAccess])
 
   // After postRequest tx confirms — record in DB
@@ -182,7 +183,7 @@ export default function BuyerPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-8">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Meridian</h1>
+          <h1 className="text-4xl font-bold tracking-tight">DataDaddy</h1>
           <p className="text-muted-foreground">Connect your wallet to post lease requests.</p>
         </div>
         <ConnectButton />
@@ -237,7 +238,13 @@ export default function BuyerPage() {
           </TabsList>
 
           <TabsContent value="requests" className="mt-4">
-            {requests.length === 0 ? (
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-32 rounded-lg" />
+                ))}
+              </div>
+            ) : requests.length === 0 ? (
               <p className="text-sm text-muted-foreground">No requests posted yet.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -249,7 +256,11 @@ export default function BuyerPage() {
           </TabsContent>
 
           <TabsContent value="leases" className="mt-4 space-y-3">
-            {leases.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 rounded-lg" />
+              ))
+            ) : leases.length === 0 ? (
               <p className="text-sm text-muted-foreground">No users have approved your requests yet.</p>
             ) : (
               <>
@@ -305,7 +316,11 @@ export default function BuyerPage() {
             )}
           </TabsContent>
           <TabsContent value="access" className="mt-4 space-y-4">
-            {access.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 2 }).map((_, i) => (
+                <Skeleton key={i} className="h-24 rounded-lg" />
+              ))
+            ) : access.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No active leases yet. Users will appear here once they approve your requests.
               </p>

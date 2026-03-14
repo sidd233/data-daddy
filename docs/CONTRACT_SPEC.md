@@ -1,4 +1,4 @@
-# CONTRACT_SPEC.md — Meridian
+# CONTRACT_SPEC.md — DataDaddy
 
 > **Purpose:** Final contract functions, params, events, revert conditions.
 > **Prevents:** Frontend–contract mismatch.
@@ -520,7 +520,7 @@ event RequestExpired(
 
 ## 3. IZKVerifier.sol
 
-Implemented by each ZK provider's on-chain verifier. Not deployed by Meridian.
+Implemented by each ZK provider's on-chain verifier. Not deployed by DataDaddy.
 
 ```solidity
 // interfaces/IZKVerifier.sol

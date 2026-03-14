@@ -10,18 +10,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toaster } from "@/components/ui/sonner"
 import { ShieldCheck, FileText } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000"
 
 export default function LeasesPage() {
   const { address, isConnected } = useWallet()
   const [leases, setLeases] = useState<LeaseItem[]>([])
+  const [loading, setLoading] = useState(true)
   const [actioningId, setActioningId] = useState<number | null>(null)
 
   const fetchLeases = useCallback(async () => {
     if (!address) return
     const res = await fetch(`${BACKEND}/api/lease/history?address=${address}`)
     if (res.ok) setLeases(await res.json())
+    setLoading(false)
   }, [address])
 
   useEffect(() => {
@@ -59,7 +62,7 @@ export default function LeasesPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-8">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Meridian</h1>
+          <h1 className="text-4xl font-bold tracking-tight">DataDaddy</h1>
           <p className="text-muted-foreground">Connect your wallet to view leases.</p>
         </div>
         <ConnectButton />
@@ -99,7 +102,11 @@ export default function LeasesPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {active.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-lg" />
+                  ))
+                ) : active.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No active leases.</p>
                 ) : (
                   active.map((lease) => (
@@ -126,7 +133,11 @@ export default function LeasesPage() {
                 <CardDescription>All completed, settled, and revoked leases.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                {past.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 2 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 rounded-lg" />
+                  ))
+                ) : past.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No past leases yet.</p>
                 ) : (
                   past.map((lease) => (

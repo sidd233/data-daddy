@@ -14,6 +14,7 @@ import { AttributeCard } from "@/components/attribute-card"
 import { MatchedRequestRow, type MatchedRequest } from "@/components/matched-request-row"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Toaster } from "@/components/ui/sonner"
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000"
@@ -24,12 +25,15 @@ interface OnChainAttribute {
   verified: boolean
   confidence: number
   evidence: string
+  method?: string
 }
 
 export default function Home() {
   const { address, isConnected } = useWallet()
 
   const [attributes, setAttributes] = useState<OnChainAttribute[]>([])
+  const [loadingAttrs, setLoadingAttrs] = useState(true)
+  const [loadingMatched, setLoadingMatched] = useState(true)
   const [verifying, setVerifying] = useState(false)
   const [matched, setMatched] = useState<MatchedRequest[]>([])
   const [approvingId, setApprovingId] = useState<number | null>(null)
@@ -92,8 +96,10 @@ export default function Home() {
 
   const fetchMatched = useCallback(async () => {
     if (!address) return
+    setLoadingMatched(true)
     const res = await fetch(`${BACKEND}/api/match/requests?address=${address}`)
     if (res.ok) setMatched(await res.json())
+    setLoadingMatched(false)
   }, [address])
 
   const fetchExistingAttributes = useCallback(async () => {
@@ -103,13 +109,14 @@ export default function Home() {
       const data = await res.json()
       if (data.length > 0) setAttributes(data)
     }
+    setLoadingAttrs(false)
   }, [address])
 
   useEffect(() => {
     if (!isConnected || !address) return
     fetchExistingAttributes()
     fetchMatched()
-    const interval = setInterval(fetchMatched, 15_000)
+    const interval = setInterval(() => { fetchMatched(); fetchExistingAttributes() }, 15_000)
     return () => clearInterval(interval)
   }, [isConnected, address, fetchMatched, fetchExistingAttributes])
 
@@ -158,7 +165,7 @@ export default function Home() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-8">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold tracking-tight">Meridian</h1>
+          <h1 className="text-4xl font-bold tracking-tight">DataDaddy</h1>
           <p className="text-muted-foreground text-lg">Privacy-first on-chain data leasing</p>
         </div>
         <ConnectButton />
@@ -190,7 +197,13 @@ export default function Home() {
               {verifying ? "Verifying…" : "Verify My Wallet"}
             </Button>
 
-            {attributes.length > 0 && (
+            {loadingAttrs ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : attributes.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {attributes.map((attr) => (
                   <AttributeCard
@@ -198,10 +211,11 @@ export default function Home() {
                     attribute={attr.attribute}
                     verified={attr.verified}
                     evidence={attr.evidence}
+                    method={attr.method}
                   />
                 ))}
               </div>
-            )}
+            ) : null}
           </CardContent>
         </Card>
 
@@ -217,7 +231,13 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {matched.length === 0 ? (
+            {loadingMatched ? (
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-lg" />
+                ))}
+              </div>
+            ) : matched.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No matching requests yet. Verify your attributes first, or check back later.
               </p>

@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — Meridian
+# ARCHITECTURE.md — DataDaddy
 
 > **Purpose:** System design, contracts, data flow, trust boundaries.
 > **Audience:** AI code generation agent. Every spec here is authoritative.
@@ -26,7 +26,7 @@
 ## 2. Repo Structure
 
 ```
-meridian/
+DataDaddy/
 ├── packages/
 │   ├── contracts/          # Hardhat project
 │   │   ├── contracts/
@@ -419,7 +419,7 @@ export function getZKProvider(providerKey: string): IZKProvider {
 **Anon Aadhaar specifics:**
 - Proof generated client-side via `anon-aadhaar-react` SDK component
 - Attributes extracted: `age_range` (e.g. `"22-28"`), `state` (e.g. `"Maharashtra"`)
-- Nullifier tracked by Anon Aadhaar verifier contract on-chain — Meridian does not re-implement
+- Nullifier tracked by Anon Aadhaar verifier contract on-chain — DataDaddy does not re-implement
 - Confidence always `1.0` for valid proofs
 
 **Adding a new provider (5 steps, no contract changes):**
@@ -633,7 +633,7 @@ export const LEASE_MANAGER = {
 
 | Actor | Trusted For | Not Trusted For |
 |-------|------------|----------------|
-| Meridian Backend | AI inference, matching, routing | Holding personal data |
+| DataDaddy Backend | AI inference, matching, routing | Holding personal data |
 | Blockchain | Certificate state, lease state | Off-chain attribute values |
 | ZK Provider | Attribute ZK proofs | Document contents |
 | AI Model | Confidence scoring | Binary truth determination |

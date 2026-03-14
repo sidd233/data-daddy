@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Meridian (data-daddy)** — A privacy-first, on-chain data leasing protocol on Base Sepolia. Users prove ownership of credentials (on-chain activity, ZK identity proofs) and lease access to those credentials to buyers via escrow-based smart contracts with revocable access.
+**DataDaddy** — A privacy-first, on-chain data leasing protocol on Base Sepolia. Users prove ownership of credentials (on-chain activity, ZK identity proofs) and lease access to those credentials to buyers via escrow-based smart contracts with revocable access.
 
 ## Monorepo Structure
 

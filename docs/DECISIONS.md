@@ -1,4 +1,4 @@
-# DECISIONS.md — Meridian
+# DECISIONS.md — DataDaddy
 
 > **Purpose:** Date-stamped architectural decisions with reasoning.
 > **Prevents:** Repeating old debates. If a decision is here, it is closed.
@@ -437,7 +437,7 @@ Status:   CLOSED
 Decided by: Full team
 ```
 
-**Decision:** Buyers receive two things and only two things: (1) DP-noised aggregate statistics about the matched segment, and (2) the ability to deliver content to matched users via the Meridian dashboard. They never receive any individual-level data.
+**Decision:** Buyers receive two things and only two things: (1) DP-noised aggregate statistics about the matched segment, and (2) the ability to deliver content to matched users via the DataDaddy dashboard. They never receive any individual-level data.
 
 **Options considered:**
 - Give buyers individual pseudonymous records — rejected: pseudonymous is not anonymous, re-identification risk
@@ -445,10 +445,10 @@ Decided by: Full team
 - Aggregate stats + content delivery pipeline only — selected
 
 **Reasoning:**
-- The fundamental value proposition of Meridian is that user identity is never transferred. If buyers received individual records — even pseudonymous ones — the entire privacy model collapses
+- The fundamental value proposition of DataDaddy is that user identity is never transferred. If buyers received individual records — even pseudonymous ones — the entire privacy model collapses
 - Aggregate stats are sufficient for buyers to evaluate audience quality and ROI
 - Content delivery solves the buyer's actual problem (reaching a verified audience) without requiring identity transfer
-- This framing also removes legal and regulatory risk around personal data transfer — Meridian is not a data broker, it is an audience platform
+- This framing also removes legal and regulatory risk around personal data transfer — DataDaddy is not a data broker, it is an audience platform
 
 **Consequences:** No API route in the system returns a wallet address, name, or any identifier to a buyer. This is enforced architecturally — buyer-facing routes only call the stats aggregator and content delivery functions. Code review must verify no buyer route touches `verification_verdicts` directly.
 
@@ -516,16 +516,16 @@ Status:   CLOSED
 Decided by: Full team
 ```
 
-**Decision:** `settleLease` can be called by anyone after the lease expires, not just the user or Meridian.
+**Decision:** `settleLease` can be called by anyone after the lease expires, not just the user or DataDaddy.
 
 **Options considered:**
 - Only the user can call `settleLease` — rejected: user may forget, or lose their key
-- Only Meridian backend can call `settleLease` — rejected: centralised control over payment release is a trust risk
+- Only DataDaddy backend can call `settleLease` — rejected: centralised control over payment release is a trust risk
 - Permissionless (anyone can call after expiry) — selected
 
 **Reasoning:**
 - Permissionless settlement means users don't need to remember to claim — a cron job, a keeper, or even a public good actor can trigger it
-- It removes any ability for Meridian to hold payments hostage by simply not calling settlement
+- It removes any ability for DataDaddy to hold payments hostage by simply not calling settlement
 - The validation inside `settleLease` is strict: `status == Active` AND `block.timestamp >= expiresAt` AND ETH transferred to `lease.user`. There is no way for a malicious caller to redirect the payment
 - This is the standard pattern for on-chain payment rails — Uniswap, Compound, and most DeFi protocols use permissionless settlement
 
@@ -642,7 +642,7 @@ Status:   CLOSED
 Decided by: Full team
 ```
 
-**Decision:** Meridian is a data leasing platform. Users lease time-bounded proofs of their attributes. They never sell their data. The underlying attribute always remains with the user.
+**Decision:** DataDaddy is a data leasing platform. Users lease time-bounded proofs of their attributes. They never sell their data. The underlying attribute always remains with the user.
 
 **Options considered:**
 - Permanent data sale model — rejected: irrevocable, removes user control, creates liability

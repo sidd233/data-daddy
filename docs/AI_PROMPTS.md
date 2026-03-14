@@ -1,4 +1,4 @@
-# AI_PROMPTS.md — Meridian
+# AI_PROMPTS.md — Datadaddy
 
 > **Purpose:** Standardized prompt templates for Solidity, React, and API code generation.
 > **Prevents:** Inconsistent AI output quality and missing context errors.
@@ -43,7 +43,7 @@ Use when generating an entire contract from scratch.
 **Template:**
 
 ```
-You are writing production Solidity for a hackathon project called Meridian.
+You are writing production Solidity for a hackathon project called Datadaddy.
 
 ## Your task
 Write [CertificateRegistry.sol / LeaseManager.sol] in full.
@@ -90,7 +90,7 @@ Use when adding one function to an existing contract.
 **Template:**
 
 ```
-You are adding a single function to an existing Solidity contract for a project called Meridian.
+You are adding a single function to an existing Solidity contract for a project called Datadaddy.
 
 ## Existing contract
 [PASTE FULL EXISTING CONTRACT]
@@ -125,7 +125,7 @@ Use when writing tests for a contract.
 **Template:**
 
 ```
-You are writing Hardhat unit tests in TypeScript for a Solidity contract in a project called Meridian.
+You are writing Hardhat unit tests in TypeScript for a Solidity contract in a project called Datadaddy.
 
 ## Contract under test
 [PASTE FULL CONTRACT]
@@ -167,7 +167,7 @@ Use when generating a single backend API route.
 **Template:**
 
 ```
-You are writing a Next.js 14 API route for a project called Meridian.
+You are writing a Next.js 14 API route for a project called Datadaddy.
 
 ## Route to build
 Method:   [GET / POST]
@@ -220,7 +220,7 @@ Use when generating a full page component.
 **Template:**
 
 ```
-You are writing a React component for a Next.js 14 app called Meridian.
+You are writing a React component for a Next.js 14 app called Datadaddy.
 
 ## Component to build
 Feature:     [F-XX — Feature Name]
@@ -276,7 +276,7 @@ Use for smaller reusable components (cards, panels, modals).
 **Template:**
 
 ```
-You are writing a reusable React UI component for a Next.js 14 app called Meridian.
+You are writing a reusable React UI component for a Next.js 14 app called Datadaddy.
 
 ## Component to build
 Name:        [AttributeCard / LeaseRequestRow / ForfeitureModal]
@@ -316,7 +316,7 @@ Use for non-component backend logic (ZK providers, AI verifier, stats aggregator
 **Template:**
 
 ```
-You are writing a TypeScript library module for a Next.js 14 backend called Meridian.
+You are writing a TypeScript library module for a Next.js 14 backend called Datadaddy.
 
 ## Module to build
 File path:   [src/lib/ai/verifier.ts]
@@ -363,7 +363,7 @@ Use when generating SQL for new tables or altering existing ones.
 **Template:**
 
 ```
-You are writing a Postgres SQL migration for a project called Meridian hosted on Supabase.
+You are writing a Postgres SQL migration for a project called Datadaddy hosted on Supabase.
 
 ## Migration task
 [Add the buyer_content table / Add index on verification_verdicts.wallet_address / etc.]
@@ -402,7 +402,7 @@ Use when generating the deployment script for contracts.
 **Template:**
 
 ```
-You are writing a Hardhat deploy script in TypeScript for a project called Meridian deploying to Base Sepolia.
+You are writing a Hardhat deploy script in TypeScript for a project called Datadaddy deploying to Base Sepolia.
 
 ## Contracts to deploy
 1. CertificateRegistry.sol

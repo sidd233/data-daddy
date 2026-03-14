@@ -2,7 +2,7 @@ import { formatEther } from "viem"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ATTRIBUTE_LABELS } from "@/lib/attributeKeys"
+import { ATTRIBUTE_LABELS, ATTRIBUTE_TIERS } from "@/lib/attributeKeys"
 
 export interface MatchedRequest {
   id: number
@@ -37,7 +37,12 @@ export function MatchedRequestRow({ request, approving, onApprove }: Props) {
           <Badge variant="outline">
             {ATTRIBUTE_LABELS[request.attribute_key as keyof typeof ATTRIBUTE_LABELS] ?? request.attribute_key}
           </Badge>
-          <Badge variant="secondary">Tier {request.min_confidence >= 100 ? "1" : "3"}</Badge>
+          {(() => {
+            const tier = ATTRIBUTE_TIERS[request.attribute_key as keyof typeof ATTRIBUTE_TIERS]
+            if (tier === 1) return <Badge variant="secondary">Tier 1 · On-chain</Badge>
+            if (tier === 2) return <Badge variant="secondary" className="text-[#00E5A0] border-[#00E5A0]/30">Tier 2 · ZK</Badge>
+            return <Badge variant="outline">Tier 3 · AI</Badge>
+          })()}
         </div>
         <p className="text-xs text-muted-foreground">
           {formatEther(BigInt(request.price_per_user))} ETH ·{" "}

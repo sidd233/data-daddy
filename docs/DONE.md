@@ -1,4 +1,4 @@
-# DONE.md — Meridian
+# DONE.md — DataDaddy
 
 > **Purpose:** Log of completed, locked features.
 > **Prevents:** Losing momentum and rebuilding work that's already done.

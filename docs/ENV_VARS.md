@@ -1,4 +1,4 @@
-# ENV_VARS.md — Meridian
+# ENV_VARS.md — DataDaddy
 
 > **Purpose:** All environment variables with source, visibility, and setup instructions.
 > **Prevents:** Setup confusion and onboarding friction.
@@ -205,7 +205,7 @@ This is the file committed to the repo. All values are blank or hardcoded non-se
 
 ```bash
 # ============================================================
-# Meridian — Environment Variables
+# DataDaddy — Environment Variables
 # Copy this file to .env.local and fill in all values.
 # See ENV_VARS.md for source, visibility, and setup notes.
 # NEVER commit .env.local
