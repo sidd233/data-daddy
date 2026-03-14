@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useWallet } from "@/contexts/WalletContext"
+import { Logo } from "@/components/logo"
 
 function shortAddr(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
@@ -20,12 +21,15 @@ export function SiteHeader() {
   const pathname = usePathname()
 
   return (
-    <header className="flex items-center justify-between py-4 border-b mb-6">
+    <header className="backdrop-blur-sm bg-background/80 sticky top-0 z-50 flex items-center justify-between py-4 border-b mb-6">
       <div className="flex items-center gap-5">
         {/* Brand */}
         <div className="flex items-center gap-2">
-          <Link href="/" className="text-lg font-bold tracking-tight hover:opacity-80 transition-opacity">
-            DataDaddy
+          <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Logo size={26} />
+            <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-[#00E5A0] to-emerald-400 bg-clip-text text-transparent">
+              DataDaddy
+            </span>
           </Link>
           {address && (
             <span className="text-xs text-muted-foreground">{shortAddr(address)}</span>
@@ -33,7 +37,7 @@ export function SiteHeader() {
         </div>
 
         {/* Role toggle */}
-        <nav className="flex items-center rounded-lg border p-0.5 gap-0.5">
+        <nav className="flex items-center rounded-lg border bg-muted/30 p-0.5 gap-0.5">
           {ROLES.map((role) => {
             const isActive = pathname.startsWith(role.href)
             return (
@@ -51,6 +55,18 @@ export function SiteHeader() {
             )
           })}
         </nav>
+
+        {/* Dashboard link */}
+        <Link
+          href="/dashboard"
+          className={`text-sm transition-colors ${
+            pathname === "/dashboard"
+              ? "text-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Dashboard
+        </Link>
 
         {/* Secondary */}
         <Link

@@ -42,6 +42,7 @@ interface CompanyRequest {
   label_task_spec: { labels: string[]; instructions: string } | null
   status: string
   created_at: string
+  has_submitted?: boolean
 }
 
 interface PastSubmission {
@@ -103,13 +104,15 @@ export default function ContributePage() {
   }, [address])
 
   const fetchRequests = useCallback(async (attrs: VerifiedAttribute[]) => {
+    if (!address) return
     setLoadingRequests(true)
     const keys = attrs.map((a) => a.attribute)
-    const q = keys.length ? `?attribute_keys=${keys.join(",")}` : ""
-    const res = await fetch(`/api/contributor/requests${q}`)
+    const params = new URLSearchParams({ address })
+    if (keys.length) params.set("attribute_keys", keys.join(","))
+    const res = await fetch(`/api/contributor/requests?${params}`)
     if (res.ok) setRequests(await res.json())
     setLoadingRequests(false)
-  }, [])
+  }, [address])
 
   const fetchHistory = useCallback(async () => {
     if (!address) return
@@ -202,7 +205,10 @@ export default function ContributePage() {
       setAnswer("")
       setQAnswers({})
       setSelectedAttrs([])
+      setSelectedRequest(null)
       toast.success("Response submitted! CID: " + data.cid.slice(0, 12) + "…")
+      // Refresh request list so the completed state shows immediately
+      fetchRequests(verifiedAttrs)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Submission failed")
     } finally {
@@ -224,12 +230,12 @@ export default function ContributePage() {
   }
 
   return (
-    <main className="min-h-screen bg-background max-w-4xl mx-auto px-6">
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 max-w-4xl mx-auto px-6">
       <Toaster />
       <SiteHeader />
 
       <Tabs defaultValue="browse">
-        <TabsList className="mb-4">
+        <TabsList className="mb-4 bg-muted/40 p-1 rounded-xl">
           <TabsTrigger value="browse">
             <ClipboardList className="h-4 w-4 mr-1.5" />
             Browse Requests
@@ -253,7 +259,7 @@ export default function ContributePage() {
               ))}
             </div>
           ) : requests.length === 0 ? (
-            <Card>
+            <Card className="shadow-sm border-border/60">
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">
                   No open requests match your verified attributes.{" "}
@@ -265,72 +271,85 @@ export default function ContributePage() {
             </Card>
           ) : (
             <div className="space-y-3">
-              {requests.map((req) => (
-                <div
-                  key={req.id}
-                  onClick={() => handleSelectRequest(req)}
-                  className={`rounded-lg border p-4 cursor-pointer transition-colors ${
-                    selectedRequest?.id === req.id
-                      ? "border-[#00E5A0] bg-[#00E5A0]/5"
-                      : "hover:bg-muted/30"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="flex flex-wrap gap-1">
-                        {req.attribute_keys.map((k) => (
-                          <Badge key={k} variant="outline" className="text-xs">
-                            {k.replace(/_/g, " ")}
-                          </Badge>
-                        ))}
-                        <Badge
-                          variant={req.request_type === "raw" ? "secondary" : "default"}
-                          className="text-xs"
-                        >
-                          {req.request_type}
-                        </Badge>
-                      </div>
-
-                      {req.label_task_spec?.instructions ? (
-                        <p className="text-sm">{req.label_task_spec.instructions}</p>
-                      ) : (
-                        <p className="text-sm text-muted-foreground italic">
-                          Provide data matching the attributes above.
-                        </p>
-                      )}
-
-                      <div className="flex items-center gap-1.5 text-xs font-medium text-[#00E5A0]">
-                        <Coins className="h-3.5 w-3.5" />
-                        {formatEther(BigInt(req.price_per_record))} ETH per response
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        {req.questionnaire?.length
-                          ? `${req.questionnaire.length} question questionnaire`
-                          : "Free text response"}{" "}
-                        · max {req.max_records} responses
-                      </p>
-                      {/* Show refined filters */}
-                      {req.attribute_filters && Object.keys(req.attribute_filters).length > 0 && (
-                        <div className="flex gap-2 text-xs text-muted-foreground">
-                          {renderAttrFilters(req.attribute_filters).map((p) => (
-                            <span key={p}>{p}</span>
+              {requests.map((req) => {
+                const done = !!req.has_submitted
+                return (
+                  <div
+                    key={req.id}
+                    onClick={() => !done && handleSelectRequest(req)}
+                    className={`rounded-lg border p-4 transition-colors ${
+                      done
+                        ? "opacity-60 cursor-not-allowed bg-muted/20"
+                        : selectedRequest?.id === req.id
+                        ? "border-[#00E5A0] bg-[#00E5A0]/5 shadow-md cursor-pointer"
+                        : "hover:bg-muted/30 cursor-pointer"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1.5 flex-1 min-w-0">
+                        <div className="flex flex-wrap gap-1">
+                          {req.attribute_keys.map((k) => (
+                            <Badge key={k} variant="outline" className="text-xs">
+                              {k.replace(/_/g, " ")}
+                            </Badge>
                           ))}
+                          <Badge
+                            variant={req.request_type === "raw" ? "secondary" : "default"}
+                            className="text-xs"
+                          >
+                            {req.request_type}
+                          </Badge>
                         </div>
+
+                        {req.label_task_spec?.instructions ? (
+                          <p className="text-sm">{req.label_task_spec.instructions}</p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground italic">
+                            Provide data matching the attributes above.
+                          </p>
+                        )}
+
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-[#00E5A0]">
+                          <span className="bg-[#00E5A0]/10 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+                            <Coins className="h-3.5 w-3.5" />
+                            {formatEther(BigInt(req.price_per_record))} ETH per response
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {req.questionnaire?.length
+                            ? `${req.questionnaire.length} question questionnaire`
+                            : "Free text response"}{" "}
+                          · max {req.max_records} responses
+                        </p>
+                        {req.attribute_filters && Object.keys(req.attribute_filters).length > 0 && (
+                          <div className="flex gap-2 text-xs text-muted-foreground">
+                            {renderAttrFilters(req.attribute_filters).map((p) => (
+                              <span key={p}>{p}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {done ? (
+                        <span className="flex items-center gap-1 text-xs font-medium text-[#00E5A0] shrink-0 bg-[#00E5A0]/10 border border-[#00E5A0]/30 rounded-full px-2 py-0.5">
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Completed
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium shrink-0 text-[#00E5A0]">
+                          {selectedRequest?.id === req.id ? "▲ Selected" : "Select →"}
+                        </span>
                       )}
                     </div>
-
-                    <span className="text-xs font-medium shrink-0 text-[#00E5A0]">
-                      {selectedRequest?.id === req.id ? "▲ Selected" : "Select →"}
-                    </span>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
           {/* ── Answer form (shown when a request is selected) ── */}
           {selectedRequest && (
-            <Card>
+            <Card className="border-[#00E5A0]/20 shadow-md">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Database className="h-4 w-4 text-[#00E5A0]" />
@@ -464,7 +483,7 @@ export default function ContributePage() {
         <TabsContent value="history" className="space-y-4 pb-12">
           {/* Earnings summary */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <Card>
+            <Card className="bg-gradient-to-br from-background to-muted/30">
               <CardContent className="pt-5">
                 {loadingHistory ? (
                   <Skeleton className="h-8 w-16" />
@@ -476,7 +495,7 @@ export default function ContributePage() {
                 )}
               </CardContent>
             </Card>
-            <Card>
+            <Card className="bg-gradient-to-br from-background to-muted/30">
               <CardContent className="pt-5">
                 {loadingHistory ? (
                   <Skeleton className="h-8 w-16" />
@@ -511,7 +530,7 @@ export default function ContributePage() {
               ) : (
                 <div className="space-y-3">
                   {pastSubmissions.map((sub) => (
-                    <div key={sub.id} className="rounded-lg border p-4 space-y-2">
+                    <div key={sub.id} className="rounded-lg border p-4 space-y-2 hover:bg-muted/30 transition-colors">
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex flex-wrap gap-1">

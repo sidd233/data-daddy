@@ -119,7 +119,7 @@ export default function BuyerPage() {
   const [labelOptions, setLabelOptions] = useState("")
   const [labelInstructions, setLabelInstructions] = useState("")
   const [stakeEth, setStakeEth] = useState("0.01")
-  const [votingDays, setVotingDays] = useState("7")
+  const [votingHours, setVotingHours] = useState("0.25")
 
   // ── Questionnaire builder ──
   const [questions, setQuestions] = useState<QuestionnaireQuestion[]>([])
@@ -232,7 +232,7 @@ export default function BuyerPage() {
       }
       body.labelTaskSpec = { labels, instructions: labelInstructions }
       body.stakeRequired = String(BigInt(Math.round(parseFloat(stakeEth) * 1e18)))
-      body.votingPeriodSec = parseInt(votingDays, 10) * 86400
+      body.votingPeriodSec = Math.round(parseFloat(votingHours) * 3600)
     }
 
     // Only send questionnaire if it has at least one non-empty question
@@ -308,7 +308,7 @@ export default function BuyerPage() {
   const { keys: previewKeys } = buildAttributePayload()
 
   return (
-    <main className="min-h-screen bg-background max-w-4xl mx-auto px-6">
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 max-w-4xl mx-auto px-6">
       <Toaster />
       <SiteHeader />
 
@@ -331,7 +331,7 @@ export default function BuyerPage() {
 
           {/* ── Tab 1: Post Request ── */}
           <TabsContent value="post" className="mt-4">
-            <Card>
+            <Card className="shadow-sm border-border/60">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Database className="h-5 w-5 text-[#00E5A0]" />
@@ -353,7 +353,7 @@ export default function BuyerPage() {
                         onClick={() => setRequestType(t)}
                         className={`px-4 py-2 rounded-lg border text-sm transition-colors ${
                           requestType === t
-                            ? "border-[#00E5A0] bg-[#00E5A0]/10 text-foreground"
+                            ? "border-[#00E5A0] bg-[#00E5A0]/10 text-foreground font-semibold shadow-sm"
                             : "border-muted text-muted-foreground hover:border-foreground"
                         }`}
                       >
@@ -374,7 +374,7 @@ export default function BuyerPage() {
                       <div
                         key={key}
                         className={`flex items-center justify-between rounded-lg border px-4 py-3 transition-colors ${
-                          selectedBoolAttrs.has(key) ? "border-[#00E5A0] bg-[#00E5A0]/5" : "border-muted"
+                          selectedBoolAttrs.has(key) ? "border-[#00E5A0] bg-[#00E5A0]/5 shadow-sm" : "border-muted"
                         }`}
                       >
                         <Label htmlFor={`sw-${key}`} className="text-sm cursor-pointer">
@@ -400,7 +400,7 @@ export default function BuyerPage() {
                   {/* Age range */}
                   <div
                     className={`rounded-lg border px-4 py-3 space-y-3 transition-colors ${
-                      zkEnabled["age_range"] ? "border-[#00E5A0] bg-[#00E5A0]/5" : "border-muted"
+                      zkEnabled["age_range"] ? "border-[#00E5A0] bg-[#00E5A0]/5 shadow-sm" : "border-muted"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -448,7 +448,7 @@ export default function BuyerPage() {
                   {/* State of residence */}
                   <div
                     className={`rounded-lg border px-4 py-3 space-y-3 transition-colors ${
-                      zkEnabled["state_of_residence"] ? "border-[#00E5A0] bg-[#00E5A0]/5" : "border-muted"
+                      zkEnabled["state_of_residence"] ? "border-[#00E5A0] bg-[#00E5A0]/5 shadow-sm" : "border-muted"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -519,14 +519,18 @@ export default function BuyerPage() {
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="price">Price per record (ETH)</Label>
-                    <Input
-                      id="price"
-                      type="number"
-                      step="0.001"
-                      min="0"
-                      value={pricePerRecord}
-                      onChange={(e) => setPricePerRecord(e.target.value)}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.001"
+                        min="0"
+                        value={pricePerRecord}
+                        onChange={(e) => setPricePerRecord(e.target.value)}
+                        className="pr-12"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">ETH</span>
+                    </div>
                   </div>
                 </div>
 
@@ -566,21 +570,25 @@ export default function BuyerPage() {
                         />
                       </div>
                       <div className="space-y-1">
-                        <Label htmlFor="voting-days">Voting period (days)</Label>
+                        <Label htmlFor="voting-hours">Voting period (hours)</Label>
                         <Input
-                          id="voting-days"
+                          id="voting-hours"
                           type="number"
-                          min="1"
-                          value={votingDays}
-                          onChange={(e) => setVotingDays(e.target.value)}
+                          min="0.05"
+                          step="0.05"
+                          value={votingHours}
+                          onChange={(e) => setVotingHours(e.target.value)}
                         />
+                        <p className="text-xs text-muted-foreground">
+                          e.g. 0.25 = 15 min · 0.5 = 30 min · 1 = 1 hr
+                        </p>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* ── Questionnaire builder ── */}
-                <div className="space-y-3">
+                <div className="rounded-xl border border-dashed border-border/60 p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <Label>Questionnaire</Label>
@@ -683,7 +691,7 @@ export default function BuyerPage() {
 
                 {/* ── Preview + submit ── */}
                 {previewKeys.length > 0 && (
-                  <div className="rounded-lg bg-muted/30 px-4 py-3 text-xs space-y-1">
+                  <div className="rounded-xl bg-[#00E5A0]/5 border border-[#00E5A0]/20 px-4 py-3 text-xs space-y-1">
                     <p className="font-medium">Request summary</p>
                     <p className="text-muted-foreground">
                       Attributes: {previewKeys.map((k) => k.replace(/_/g, " ")).join(", ")}
@@ -723,7 +731,7 @@ export default function BuyerPage() {
             ) : (
               <div className="space-y-3">
                 {requests.map((req) => (
-                  <div key={req.id} className="rounded-lg border p-4 space-y-2">
+                  <div key={req.id} className="rounded-lg border p-4 space-y-2 hover:bg-muted/20 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1.5">
                         <div className="flex flex-wrap gap-1">
@@ -779,7 +787,7 @@ export default function BuyerPage() {
                   {requests.map((req) => (
                     <div
                       key={req.id}
-                      className="flex items-center justify-between rounded-lg border p-4"
+                      className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/40 transition-colors"
                     >
                       <div>
                         <div className="flex flex-wrap gap-1 mb-1">

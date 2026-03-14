@@ -2,41 +2,50 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 
 // Returns all active data_requests visible to contributors.
-// Optionally filters to requests whose attribute_keys overlap contributor's verified keys.
+// Pass ?address= to get a has_submitted flag per request.
+// Pass ?attribute_keys= (comma-separated) to filter by contributor's verified keys.
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const keysParam = searchParams.get("attribute_keys"); // comma-separated
+  const keysParam = searchParams.get("attribute_keys");
+  const address = searchParams.get("address");
 
   try {
-    let query: string;
-    let params: unknown[];
+    const keys = keysParam
+      ? keysParam.split(",").map((k) => k.trim()).filter(Boolean)
+      : null;
 
-    if (keysParam) {
-      const keys = keysParam.split(",").map((k) => k.trim()).filter(Boolean);
-      // Return requests whose attribute_keys overlap with contributor's verified keys
-      query = `
-        SELECT id, attribute_keys, min_confidence, max_records, price_per_record,
-               request_type, label_task_spec, stake_required, voting_period_sec,
-               on_chain_task_id, status, created_at, attribute_filters, questionnaire
-        FROM data_requests
-        WHERE status IN ('active', 'pending')
-          AND attribute_keys && $1::text[]
-        ORDER BY created_at DESC
-        LIMIT 50
-      `;
-      params = [keys];
-    } else {
-      query = `
-        SELECT id, attribute_keys, min_confidence, max_records, price_per_record,
-               request_type, label_task_spec, stake_required, voting_period_sec,
-               on_chain_task_id, status, created_at, attribute_filters, questionnaire
-        FROM data_requests
-        WHERE status IN ('active', 'pending')
-        ORDER BY created_at DESC
-        LIMIT 50
-      `;
-      params = [];
-    }
+    // LEFT JOIN data_submissions to detect if this contributor already answered each request
+    const submittedJoin = address
+      ? `LEFT JOIN (
+           SELECT request_id, TRUE AS has_submitted
+           FROM data_submissions
+           WHERE LOWER(wallet_address) = LOWER($${keys ? 2 : 1})
+             AND request_id IS NOT NULL
+           GROUP BY request_id
+         ) sub ON sub.request_id = dr.id`
+      : "";
+
+    const submittedSelect = address ? ", COALESCE(sub.has_submitted, FALSE) AS has_submitted" : "";
+
+    const whereClause = keys
+      ? `WHERE dr.status IN ('active', 'pending') AND dr.attribute_keys && $1::text[]`
+      : `WHERE dr.status IN ('active', 'pending')`;
+
+    const query = `
+      SELECT dr.id, dr.attribute_keys, dr.min_confidence, dr.max_records, dr.price_per_record,
+             dr.request_type, dr.label_task_spec, dr.stake_required, dr.voting_period_sec,
+             dr.on_chain_task_id, dr.status, dr.created_at, dr.attribute_filters, dr.questionnaire
+             ${submittedSelect}
+      FROM data_requests dr
+      ${submittedJoin}
+      ${whereClause}
+      ORDER BY dr.created_at DESC
+      LIMIT 50
+    `;
+
+    const params: unknown[] = [];
+    if (keys) params.push(keys);
+    if (address) params.push(address);
 
     const { rows } = await pool.query(query, params);
     return NextResponse.json(rows);

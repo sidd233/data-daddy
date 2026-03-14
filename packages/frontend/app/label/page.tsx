@@ -229,8 +229,16 @@ export default function LabelPage() {
   const pendingCount = myLabels.filter((l) => l.result === "pending").length
   const lostCount = myLabels.filter((l) => l.result === "lost").length
 
+  // Split tasks: votable = voting still open; awaitingSettle = deadline passed
+  const votableTasks = tasks.filter((t) => !isVotingClosed(t))
+  const awaitingSettleTasks = tasks.filter((t) => isVotingClosed(t))
+
+  // If selected task's voting just closed, deselect it
+  const activeSelectedTask =
+    selectedTask && !isVotingClosed(selectedTask) ? selectedTask : null
+
   return (
-    <main className="min-h-screen bg-background max-w-4xl mx-auto px-6">
+    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 max-w-4xl mx-auto px-6">
       <Toaster />
       <SiteHeader />
 
@@ -238,7 +246,7 @@ export default function LabelPage() {
         <TabsList className="mb-4">
           <TabsTrigger value="tasks">
             <Tag className="h-4 w-4 mr-1.5" />
-            Open Tasks
+            Open Tasks {votableTasks.length > 0 && `(${votableTasks.length})`}
           </TabsTrigger>
           <TabsTrigger value="my-labels" onClick={fetchMyLabels}>
             <CheckCircle className="h-4 w-4 mr-1.5" />
@@ -248,11 +256,13 @@ export default function LabelPage() {
 
         {/* ── Tab 1: Open label tasks ── */}
         <TabsContent value="tasks" className="space-y-6 pb-12">
+
+          {/* Votable tasks */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Tag className="h-5 w-5 text-[#00E5A0]" />
-                Open Label Tasks
+                Open Tasks
               </CardTitle>
               <CardDescription>
                 Stake ETH and vote on the correct label. Winners earn from losers' stakes.
@@ -265,16 +275,18 @@ export default function LabelPage() {
                     <Skeleton key={i} className="h-16 rounded-lg" />
                   ))}
                 </div>
-              ) : tasks.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No open label tasks available.</p>
+              ) : votableTasks.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No tasks available to vote on right now.
+                </p>
               ) : (
                 <div className="space-y-3">
-                  {tasks.map((task) => (
+                  {votableTasks.map((task) => (
                     <div
                       key={task.id}
                       className={`rounded-lg border p-4 cursor-pointer transition-colors ${
-                        selectedTask?.id === task.id
-                          ? "border-[#00E5A0] bg-[#00E5A0]/5"
+                        activeSelectedTask?.id === task.id
+                          ? "border-[#00E5A0] bg-[#00E5A0]/5 shadow-md ring-1 ring-[#00E5A0]/30"
                           : "hover:bg-muted/30"
                       }`}
                       onClick={() => handleSelectTask(task)}
@@ -296,11 +308,11 @@ export default function LabelPage() {
                           </p>
                         </div>
                         <div className="text-right shrink-0 space-y-1">
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground justify-end">
                             <Coins className="h-3.5 w-3.5" />
                             {formatEther(BigInt(task.stake_required))} ETH
                           </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-1 text-xs text-[#00E5A0] justify-end">
                             <Clock className="h-3.5 w-3.5" />
                             {deadlineText(task)}
                           </div>
@@ -313,14 +325,14 @@ export default function LabelPage() {
             </CardContent>
           </Card>
 
-          {/* Label interface */}
-          {selectedTask && (
-            <Card>
+          {/* Label interface — only for votable selected task */}
+          {activeSelectedTask && (
+            <Card className="border-[#00E5A0]/20 shadow-md">
               <CardHeader>
                 <CardTitle className="text-base">Label a Submission</CardTitle>
                 <CardDescription>
                   Read the submission and select the correct label. Stake:{" "}
-                  {formatEther(BigInt(selectedTask.stake_required))} ETH
+                  {formatEther(BigInt(activeSelectedTask.stake_required))} ETH
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -334,7 +346,7 @@ export default function LabelPage() {
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                         Data preview
                       </p>
-                      <div className="rounded-lg border bg-muted/20 p-4">
+                      <div className="rounded-lg border bg-gradient-to-br from-muted/30 to-muted/10 p-4">
                         <p className="text-sm">{selectedSubmission?.content_preview ?? "—"}</p>
                         {submissions.length > 1 && (
                           <div className="flex gap-2 mt-3">
@@ -361,11 +373,11 @@ export default function LabelPage() {
                         Select label
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {selectedTask.label_task_spec?.labels?.map((label) => (
+                        {activeSelectedTask.label_task_spec?.labels?.map((label) => (
                           <button
                             key={label}
                             onClick={() => setSelectedLabel(label)}
-                            className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+                            className={`px-4 py-2 rounded-xl border text-sm transition-colors ${
                               selectedLabel === label
                                 ? "border-[#00E5A0] bg-[#00E5A0]/10 text-foreground"
                                 : "border-muted text-muted-foreground hover:border-foreground hover:text-foreground"
@@ -377,36 +389,71 @@ export default function LabelPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <Button
-                        onClick={handleSubmitLabel}
-                        disabled={!selectedLabel || submittingLabel || isVotingClosed(selectedTask)}
-                      >
-                        {submittingLabel && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                        {submittingLabel
-                          ? "Waiting for wallet…"
-                          : `Stake & Label (${formatEther(BigInt(selectedTask.stake_required))} ETH)`}
-                      </Button>
-
-                      {isVotingClosed(selectedTask) && (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleSettle(selectedTask.id, selectedSubmission!.id)}
-                          disabled={settling}
-                        >
-                          {settling && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                          {settling ? "Settling…" : "Settle & Distribute Stakes"}
-                        </Button>
-                      )}
-                    </div>
-
-                    {isVotingClosed(selectedTask) && (
-                      <p className="text-xs text-muted-foreground">
-                        Voting period ended — click Settle to distribute stakes to majority winners.
-                      </p>
-                    )}
+                    <Button
+                      onClick={handleSubmitLabel}
+                      disabled={!selectedLabel || submittingLabel}
+                      className="w-full sm:w-auto"
+                    >
+                      {submittingLabel && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                      {submittingLabel
+                        ? "Waiting for wallet…"
+                        : `Stake & Label (${formatEther(BigInt(activeSelectedTask.stake_required))} ETH)`}
+                    </Button>
                   </>
                 )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Awaiting settlement — voting closed, not yet settled */}
+          {awaitingSettleTasks.length > 0 && (
+            <Card className="border-orange-500/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base text-orange-400">
+                  <Clock className="h-4 w-4 text-orange-400" />
+                  Awaiting Settlement
+                </CardTitle>
+                <CardDescription>
+                  Voting has closed on these tasks. Anyone can trigger settlement to distribute stakes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {awaitingSettleTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between rounded-lg border p-4 gap-3">
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex flex-wrap gap-1">
+                        {task.attribute_keys.map((k) => (
+                          <Badge key={k} variant="outline" className="text-xs">
+                            {k.replace(/_/g, " ")}
+                          </Badge>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {task.label_task_spec?.instructions ?? `Task #${task.id}`}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {formatEther(BigInt(task.stake_required))} ETH stake · voting closed
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        // Need at least one submission to settle against
+                        const keysParam = task.attribute_keys.join(",")
+                        const res = await fetch(`/api/pool/query?attribute_keys=${keysParam}`)
+                        if (!res.ok) { toast.error("Could not load submissions"); return }
+                        const subs: DataSubmission[] = await res.json()
+                        if (subs.length === 0) { toast.error("No submissions to settle"); return }
+                        handleSettle(task.id, subs[0].id)
+                      }}
+                      disabled={settling}
+                      className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                    >
+                      {settling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Settle"}
+                    </Button>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}
@@ -417,11 +464,11 @@ export default function LabelPage() {
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { label: "Won", value: wonCount, icon: CheckCircle, color: "text-[#00E5A0]" },
-              { label: "Pending", value: pendingCount, icon: Hourglass, color: "text-yellow-500" },
-              { label: "Lost", value: lostCount, icon: XCircle, color: "text-destructive" },
-            ].map(({ label, value, icon: Icon, color }) => (
-              <Card key={label}>
+              { label: "Won", value: wonCount, icon: CheckCircle, color: "text-[#00E5A0]", cardClass: "bg-gradient-to-br from-background to-[#00E5A0]/5" },
+              { label: "Pending", value: pendingCount, icon: Hourglass, color: "text-yellow-500", cardClass: "bg-gradient-to-br from-background to-yellow-500/5" },
+              { label: "Lost", value: lostCount, icon: XCircle, color: "text-destructive", cardClass: "bg-gradient-to-br from-background to-destructive/5" },
+            ].map(({ label, value, icon: Icon, color, cardClass }) => (
+              <Card key={label} className={cardClass}>
                 <CardContent className="pt-5 flex items-center gap-3">
                   <Icon className={`h-5 w-5 ${color}`} />
                   <div>
@@ -456,7 +503,7 @@ export default function LabelPage() {
               ) : (
                 <div className="space-y-3">
                   {myLabels.map((lbl) => (
-                    <div key={lbl.id} className="rounded-lg border p-4">
+                    <div key={lbl.id} className="rounded-lg border p-4 hover:bg-muted/20 transition-colors">
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex flex-wrap gap-1">
