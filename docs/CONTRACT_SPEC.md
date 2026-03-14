@@ -13,14 +13,13 @@ Fill in after Day 2 deploy. Never leave blank when going to demo.
 
 ```
 Network:                    Base Sepolia (chainId: 84532)
-CertificateRegistry:        0x________________________________________________
-LeaseManager:               0x________________________________________________
-AnonAadhaar Verifier:       0x________________________________________________  (external)
-Deployer / Issuer Wallet:   0x________________________________________________
-Deploy tx (Registry):       0x________________________________________________
-Deploy tx (LeaseManager):   0x________________________________________________
-Basescan (Registry):        https://sepolia.basescan.org/address/0x___________
-Basescan (LeaseManager):    https://sepolia.basescan.org/address/0x___________
+CertificateRegistry:        0xBcF8f15E2c981663A08Db3878B994d65ddd84944
+LeaseManager:               0x1dEcC3fBa8fbc2eb04394Ac5cC6A9497BF9E7a00
+AnonAadhaar Verifier:       0xA205f7DED9430ac03b7F0CD3eA1b22C54C1A1453  (AnonAadhaarZKVerifier)
+MockAnonAadhaar:            0x68AACB01AaeD9cAC1D46aD248F35cBd2F554F7D0  (Base Sepolia stand-in)
+Deployer / Issuer Wallet:   0xCaE780beffd68d4F3a9d0DAbC2Dcb66858aCFdf2
+Basescan (Registry):        https://sepolia.basescan.org/address/0xBcF8f15E2c981663A08Db3878B994d65ddd84944
+Basescan (LeaseManager):    https://sepolia.basescan.org/address/0x1dEcC3fBa8fbc2eb04394Ac5cC6A9497BF9E7a00
 ```
 
 ---

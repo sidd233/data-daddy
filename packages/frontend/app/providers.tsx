@@ -1,23 +1,22 @@
 "use client"
 
 import { ReactNode } from "react"
-import { WagmiProvider } from "wagmi"
+import { WagmiProvider, createConfig, http } from "wagmi"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import {
-  RainbowKitProvider,
-  darkTheme,
-  getDefaultConfig,
-} from "@rainbow-me/rainbowkit"
+import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit"
 import { baseSepolia } from "wagmi/chains"
+import { injected } from "wagmi/connectors"
 import { AnonAadhaarProvider } from "@anon-aadhaar/react"
+import { WalletProvider } from "@/contexts/WalletContext"
 
 import "@rainbow-me/rainbowkit/styles.css"
 
-const config = getDefaultConfig({
-  appName: "DataDaddy",
-  projectId:
-    process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? "YOUR_PROJECT_ID",
+const config = createConfig({
   chains: [baseSepolia],
+  connectors: [injected()],
+  transports: {
+    [baseSepolia.id]: http(),
+  },
   ssr: true,
 })
 
@@ -43,7 +42,9 @@ export function Providers({ children }: { children: ReactNode }) {
               wasm_url: "/aadhaar-verifier.wasm",
             }}
           >
-            {children}
+            <WalletProvider>
+              {children}
+            </WalletProvider>
           </AnonAadhaarProvider>
         </RainbowKitProvider>
       </QueryClientProvider>
