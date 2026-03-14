@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3000"
-
 interface ZKResult {
   attributeKey: string
   extractedValue: string
@@ -44,7 +42,6 @@ export default function VerifyPage() {
   const [anonAadhaar] = useAnonAadhaar()
   const [submitting, setSubmitting] = useState(false)
   const [results, setResults] = useState<ZKResult[]>([])
-  const [matchedCount, setMatchedCount] = useState<number | null>(null)
 
   // Document verification state
   const [docAttribute, setDocAttribute] = useState("")
@@ -64,7 +61,7 @@ export default function VerifyPage() {
     form.append("claimedValue", docClaimedValue.trim())
     form.append("walletAddress", address)
     try {
-      const res = await fetch(`${BACKEND}/api/verify/document`, { method: "POST", body: form })
+      const res = await fetch(`/api/verify/document`, { method: "POST", body: form })
       if (!res.ok) throw new Error(await res.text())
       const data = await res.json()
       setDocResults((prev) => [
@@ -103,7 +100,7 @@ export default function VerifyPage() {
     const pcd = proofs[0].pcd
 
     setSubmitting(true)
-    fetch(`${BACKEND}/api/verify/zk`, {
+    fetch(`/api/verify/zk`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -118,11 +115,6 @@ export default function VerifyPage() {
         setResults(data.results ?? [])
         const verified = (data.results ?? []).filter((r: ZKResult) => r.valid).length
         toast.success(`ZK proof verified — ${verified} attribute${verified !== 1 ? "s" : ""} confirmed`)
-        // Fetch matched requests to show the count callout
-        fetch(`${BACKEND}/api/match/requests?address=${address}`)
-          .then((r) => r.ok ? r.json() : [])
-          .then((matches) => setMatchedCount(Array.isArray(matches) ? matches.length : 0))
-          .catch(() => {})
       })
       .catch((err) => {
         toast.error("ZK verification failed.")
@@ -223,20 +215,14 @@ export default function VerifyPage() {
                   </div>
                 ))}
 
-                {matchedCount !== null && (
-                  <div className="flex items-center justify-between rounded-lg border border-[#00E5A0]/30 bg-[#00E5A0]/5 px-4 py-3">
-                    <p className="text-sm font-medium">
-                      {matchedCount > 0
-                        ? `${matchedCount} matched lease request${matchedCount !== 1 ? "s" : ""} available`
-                        : "No matched requests yet — check back later"}
-                    </p>
-                    {matchedCount > 0 && (
-                      <Link href="/" className="text-sm font-medium text-[#00E5A0] hover:underline">
-                        Go to Dashboard →
-                      </Link>
-                    )}
-                  </div>
-                )}
+                <div className="flex items-center justify-between rounded-lg border border-[#00E5A0]/30 bg-[#00E5A0]/5 px-4 py-3">
+                  <p className="text-sm font-medium">
+                    Ready to contribute your data to AI training pools?
+                  </p>
+                  <Link href="/contribute" className="text-sm font-medium text-[#00E5A0] hover:underline">
+                    Contribute Data →
+                  </Link>
+                </div>
               </div>
             )}
           </CardContent>

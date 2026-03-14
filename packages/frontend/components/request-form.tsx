@@ -69,6 +69,7 @@ export function RequestForm({ onSubmit }: Props) {
           <Select
             value={values.attributeKey}
             onValueChange={(v) => {
+              if (!v) return
               const tier = ATTRIBUTE_TIERS[v as keyof typeof ATTRIBUTE_TIERS]
               setValues((p) => ({
                 ...p,

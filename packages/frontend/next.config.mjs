@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  serverExternalPackages: ["@anon-aadhaar/core"],
+  serverExternalPackages: ["@anon-aadhaar/core", "pg"],
   typescript: { ignoreBuildErrors: true },
 }
 

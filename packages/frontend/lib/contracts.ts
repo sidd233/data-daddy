@@ -177,3 +177,137 @@ export const LEASE_MANAGER = {
   address: LEASE_MANAGER_ADDRESS,
   abi: LEASE_MANAGER_ABI,
 } as const;
+
+export const LABELLING_POOL_ADDRESS = process.env
+  .NEXT_PUBLIC_LABELLING_POOL_ADDRESS as `0x${string}`;
+
+export const LABELLING_POOL_ABI = [
+  {
+    name: "createTask",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "taskId", type: "bytes32" },
+      { name: "stakeRequired", type: "uint256" },
+      { name: "votingPeriodSec", type: "uint256" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "stakeAndLabel",
+    type: "function",
+    stateMutability: "payable",
+    inputs: [
+      { name: "taskId", type: "bytes32" },
+      { name: "dataId", type: "bytes32" },
+      { name: "label", type: "string" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "settle",
+    type: "function",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "taskId", type: "bytes32" },
+      { name: "dataId", type: "bytes32" },
+    ],
+    outputs: [],
+  },
+  {
+    name: "getTask",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "taskId", type: "bytes32" }],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "stakeRequired", type: "uint256" },
+          { name: "votingPeriodSec", type: "uint256" },
+          { name: "createdAt", type: "uint256" },
+          { name: "exists", type: "bool" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getResult",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "taskId", type: "bytes32" },
+      { name: "dataId", type: "bytes32" },
+    ],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "winningLabel", type: "string" },
+          { name: "totalLabellers", type: "uint256" },
+          { name: "majorityCount", type: "uint256" },
+          { name: "settled", type: "bool" },
+        ],
+      },
+    ],
+  },
+  {
+    name: "getLabelCount",
+    type: "function",
+    stateMutability: "view",
+    inputs: [
+      { name: "taskId", type: "bytes32" },
+      { name: "dataId", type: "bytes32" },
+    ],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    name: "TaskCreated",
+    type: "event",
+    inputs: [
+      { name: "taskId", type: "bytes32", indexed: true },
+      { name: "stakeRequired", type: "uint256", indexed: false },
+      { name: "votingPeriodSec", type: "uint256", indexed: false },
+      { name: "createdAt", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    name: "LabelSubmitted",
+    type: "event",
+    inputs: [
+      { name: "taskId", type: "bytes32", indexed: true },
+      { name: "dataId", type: "bytes32", indexed: true },
+      { name: "labeller", type: "address", indexed: true },
+      { name: "label", type: "string", indexed: false },
+      { name: "staked", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    name: "TaskSettled",
+    type: "event",
+    inputs: [
+      { name: "taskId", type: "bytes32", indexed: true },
+      { name: "dataId", type: "bytes32", indexed: true },
+      { name: "winningLabel", type: "string", indexed: false },
+      { name: "totalLabellers", type: "uint256", indexed: false },
+      { name: "majorityCount", type: "uint256", indexed: false },
+    ],
+  },
+  {
+    name: "StakeSlashed",
+    type: "event",
+    inputs: [
+      { name: "taskId", type: "bytes32", indexed: true },
+      { name: "dataId", type: "bytes32", indexed: true },
+      { name: "labeller", type: "address", indexed: true },
+      { name: "amount", type: "uint256", indexed: false },
+    ],
+  },
+] as const;
+
+export const LABELLING_POOL = {
+  address: LABELLING_POOL_ADDRESS,
+  abi: LABELLING_POOL_ABI,
+} as const;

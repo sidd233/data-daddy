@@ -156,7 +156,6 @@ export async function GET(request: NextRequest) {
     // ── long_term_holder: any tx older than 90 days ───────────────────────────
     const oldTx = timestamps.filter((t) => NOW_MS - t >= DAYS_90_MS);
     const longTermVerified = oldTx.length >= 1 || (sentTransfers.length >= 1 && timestamps.length === 0);
-    // fallback: if metadata not returned but has sent txs, assume long-term
 
     // ── nft_holder ────────────────────────────────────────────────────────────
     const nftTransfers = nftRes.data?.result?.transfers ?? [];

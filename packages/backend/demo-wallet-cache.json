@@ -1,0 +1,32 @@
+[
+  {
+    "attribute": "defi_user",
+    "verified": true,
+    "confidence": 1.0,
+    "evidence": "14 DeFi contract interaction(s) [cached]"
+  },
+  {
+    "attribute": "asset_holder",
+    "verified": true,
+    "confidence": 1.0,
+    "evidence": "Holds ETH + 3 ERC20 token type(s) [cached]"
+  },
+  {
+    "attribute": "active_wallet",
+    "verified": true,
+    "confidence": 1.0,
+    "evidence": "22 outgoing + 18 incoming transfers [cached]"
+  },
+  {
+    "attribute": "long_term_holder",
+    "verified": true,
+    "confidence": 1.0,
+    "evidence": "7 transaction(s) older than 90 days [cached]"
+  },
+  {
+    "attribute": "nft_holder",
+    "verified": true,
+    "confidence": 1.0,
+    "evidence": "At least one ERC721 transfer found [cached]"
+  }
+]

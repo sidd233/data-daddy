@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 
+const EPSILON = 1.0;
+
+function laplaceSample(scale: number): number {
+  // Inverse CDF method for Laplace distribution
+  const u = Math.random() - 0.5;
+  return -scale * Math.sign(u) * Math.log(1 - 2 * Math.abs(u));
+}
+
+function applyLaplaceNoise(value: number, sensitivity: number, epsilon: number): number {
+  const scale = sensitivity / epsilon;
+  return Math.max(0, Math.round(value + laplaceSample(scale)));
+}
+
 export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
@@ -32,7 +45,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         active_requests: 0,
         pending_matches: 0,
-        potential_earnings: 0
+        potential_earnings: 0,
+        privacy_budget_used: EPSILON,
       });
     }
 
@@ -55,9 +69,10 @@ export async function GET(request: NextRequest) {
     );
 
     return NextResponse.json({
-      active_requests: matches.rows.length,
-      pending_matches: pendingMatches,
-      potential_earnings: potentialEarnings
+      active_requests: applyLaplaceNoise(matches.rows.length, 1, EPSILON),
+      pending_matches: applyLaplaceNoise(pendingMatches, 1, EPSILON),
+      potential_earnings: applyLaplaceNoise(potentialEarnings, 1, EPSILON),
+      privacy_budget_used: EPSILON,
     });
 
   } catch (error) {
