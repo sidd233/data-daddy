@@ -78,3 +78,7 @@ Chain ID: `84532` (Base Sepolia)
 | [`docs/DECISIONS.md`](docs/DECISIONS.md) | Numbered architectural decision log (D-01 to D-27) |
 | [`docs/ENV_VARS.md`](docs/ENV_VARS.md) | All environment variables with source and setup instructions |
 | [`docs/DONE.md`](docs/DONE.md) | Completed feature log with commit references |
+
+
+
+Hi, Rashul here I did a ton of work on this project from Sthita's laptop. Just want credit here thanks. 
